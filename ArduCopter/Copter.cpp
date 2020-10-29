@@ -108,7 +108,7 @@ const AP_Scheduler::Task Copter::scheduler_tasks[] = {
 #endif
     SCHED_TASK(charged_return_to_station, 20, 100),
     SCHED_TASK(charged_takeoff, 20, 100),
-    SCHED_TASK(captrial, 20, 100),
+    //SCHED_TASK(captrial, 20, 100),
 #if PROXIMITY_ENABLED == ENABLED
     SCHED_TASK_CLASS(AP_Proximity,         &copter.g2.proximity,        update,         200,  50),
 #endif
@@ -257,7 +257,6 @@ void Copter::captrial()
 
         //Restart the mission
         AP::mission()->resume();
-        copter.AP
         CHARGED == true;
     }
 
