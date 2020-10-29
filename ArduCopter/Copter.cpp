@@ -108,7 +108,7 @@ const AP_Scheduler::Task Copter::scheduler_tasks[] = {
 #endif
     SCHED_TASK(charged_return_to_station, 20, 100),
     SCHED_TASK(charged_takeoff, 20, 100),
-    //SCHED_TASK(captrial, 20, 100),
+    SCHED_TASK(captrial, 20, 100),
 #if PROXIMITY_ENABLED == ENABLED
     SCHED_TASK_CLASS(AP_Proximity,         &copter.g2.proximity,        update,         200,  50),
 #endif
@@ -254,9 +254,9 @@ void Copter::captrial()
         copter.set_auto_armed(true);
         copter.mode_guided.do_user_takeoff_start(800);
         copter.mode_guided.run();
-
+        copter.set_mode(Mode::Number::AUTO, ModeReason::BATTERY_FAILSAFE);
         //Restart the mission
-        AP::mission()->resume();
+        //AP::mission()->resume();
         CHARGED == true;
     }
 
@@ -264,7 +264,7 @@ void Copter::captrial()
 
 void Copter::charged_return_to_station()
 {
-    if (CHARGED == false && copter.battery.capacity_remaining_pct() < 80) {
+    if (CHARGED == false && copter.battery.capacity_remaining_pct() < 20) {
     //Checks if drone can return home with remaining battery, based on distance from home, speed (11.1 m/s) and flight time with full battery (420secs)
     //if (CHARGED == false && battery.capacity_remaining_pct() < (home_distance()+100)/(11.1*4.2)) {
 
