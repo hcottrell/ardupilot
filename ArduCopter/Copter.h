@@ -455,6 +455,9 @@ private:
                            FUNCTOR_BIND_MEMBER(&Copter::handle_battery_failsafe, void, const char*, const int8_t),
                            _failsafe_priorities};
 
+    //CAPSTONE
+    bool CHARGED = false;
+
 #if OSD_ENABLED == ENABLED
     AP_OSD osd;
 #endif
@@ -671,6 +674,11 @@ private:
     void update_super_simple_bearing(bool force_update);
     void read_AHRS(void);
     void update_altitude();
+
+    //CAPSTONE Charging
+    void charged_takeoff();
+    void charged_return_to_station();
+    void captrial();
 
     // Attitude.cpp
     float get_pilot_desired_yaw_rate(int16_t stick_angle);

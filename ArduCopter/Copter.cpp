@@ -106,6 +106,9 @@ const AP_Scheduler::Task Copter::scheduler_tasks[] = {
 #if RANGEFINDER_ENABLED == ENABLED
     SCHED_TASK(read_rangefinder,      20,    100),
 #endif
+    SCHED_TASK(charged_return_to_station, 20, 100),
+    SCHED_TASK(charged_takeoff, 20, 100),
+    SCHED_TASK(captrial, 20, 100),
 #if PROXIMITY_ENABLED == ENABLED
     SCHED_TASK_CLASS(AP_Proximity,         &copter.g2.proximity,        update,         200,  50),
 #endif
@@ -223,6 +226,62 @@ void Copter::setup()
 
     // initialise the main loop scheduler
     scheduler.init(&scheduler_tasks[0], ARRAY_SIZE(scheduler_tasks), MASK_LOG_PM);
+}
+
+//Takeoff after being charged, can only take place after the drone has completed charged_return_to_station
+void Copter::charged_takeoff()
+{
+    if (CHARGED == true && battery.capacity_remaining_pct() > 20) {
+        //Set mode to guided, then use guided takeoff
+        //Commented out below lines, should not immediately takeoff after being switched on, as CHARGED is initially false, but risk is there
+        //gcs().send_text(MSG_BATTERY_STATUS, "Battery Full, Takeoff");
+        set_mode(Mode::Number::GUIDED, ModeReason::BATTERY_FAILSAFE);   
+        mode_guided.do_user_takeoff_start(800);
+        mode_guided.run();
+
+        //Restart the mission
+        AP::mission()->resume();
+
+        CHARGED == false;
+    }
+
+}
+
+void Copter::captrial()
+{
+    if (CHARGED == false) {
+        copter.set_mode(Mode::Number::GUIDED, ModeReason::BATTERY_FAILSAFE);
+        copter.set_auto_armed(true);
+        copter.mode_guided.do_user_takeoff_start(800);
+        copter.mode_guided.run();
+
+        //Restart the mission
+        AP::mission()->resume();
+        copter.AP
+        CHARGED == true;
+    }
+
+}
+
+void Copter::charged_return_to_station()
+{
+    if (CHARGED == false && copter.battery.capacity_remaining_pct() < 20) {
+    //Checks if drone can return home with remaining battery, based on distance from home, speed (11.1 m/s) and flight time with full battery (420secs)
+    //if (CHARGED == false && battery.capacity_remaining_pct() < (home_distance()+100)/(11.1*4.2)) {
+
+        //Initialise the mission library and pause the mission
+        //gcs().send_text(MSG_BATTERY_STATUS, "Battery Low, RTL");
+
+        AP::mission()->init();
+        AP::mission()->stop();
+
+        
+        //Set mode to RTL
+        copter.set_mode(Mode::Number::RTL, ModeReason::BATTERY_FAILSAFE);
+        //mode_rtl.init(true);
+        //mode_rtl.run(true);
+        CHARGED = true;
+    }
 }
 
 void Copter::loop()
