@@ -264,7 +264,7 @@ void Copter::captrial()
 
 void Copter::charged_return_to_station()
 {
-    if (CHARGED == false && copter.battery.capacity_remaining_pct() < 20) {
+    if (CHARGED == false && copter.battery.capacity_remaining_pct() < 80) {
     //Checks if drone can return home with remaining battery, based on distance from home, speed (11.1 m/s) and flight time with full battery (420secs)
     //if (CHARGED == false && battery.capacity_remaining_pct() < (home_distance()+100)/(11.1*4.2)) {
 
